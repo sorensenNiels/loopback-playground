@@ -39,7 +39,7 @@
     "dataSource": null
   },
   "person": {
-    "dataSource": "db",
+    "dataSource": "mongo",
     "public": true
   }
 }
