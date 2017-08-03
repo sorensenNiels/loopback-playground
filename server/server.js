@@ -2,8 +2,22 @@
 
 var loopback = require('loopback');
 var boot = require('loopback-boot');
+var session = require('express-session');
+var myLogger = require('./middelware/logger.js');
 
 var app = module.exports = loopback();
+
+app.use(session({
+  name: 'session',
+  secret: 'verySecret',
+  saveUninitialized: true,
+  resave: true,
+  cookie: {
+    maxAge: 24 * 60 * 60 * 1000,
+  },
+}));
+
+app.use(myLogger({}));
 
 app.start = function() {
   // start the web server
