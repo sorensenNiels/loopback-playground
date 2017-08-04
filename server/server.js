@@ -10,11 +10,6 @@ var parseurl = require('parseurl');
 
 var app = module.exports = loopback();
 
-app.use((req, res, next) => {
-  console.log('Middelware one');
-  return next();
-});
-
 app.use(session({
   name: 'session',
   secret: 'verySecret',
@@ -39,14 +34,13 @@ app.use(session({
 
 // Validate session information
 app.use((req, res, next) => {
-
   // Validate ip address
   if (_.isUndefined(req.session.ip)) {
     req.session.ip = req.ip;
   }
 
   if (!req.session.views) {
-    req.session.views = {}
+    req.session.views = {};
   }
 
   // get the url pathname
