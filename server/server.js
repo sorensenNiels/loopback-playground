@@ -1,21 +1,62 @@
 'use strict';
 
+const _ = require('lodash');
 var loopback = require('loopback');
-var boot = require('loopback-boot');
-var session = require('express-session');
+var boot     = require('loopback-boot');
+var session  = require('express-session');
+const MongoStore = require('connect-mongo')(session);
 var myLogger = require('./middelware/logger.js');
+var parseurl = require('parseurl');
 
 var app = module.exports = loopback();
+
+app.use((req, res, next) => {
+  console.log('Middelware one');
+  return next();
+});
 
 app.use(session({
   name: 'session',
   secret: 'verySecret',
+  cookie: {
+    secure: 'auto'
+  },
   saveUninitialized: true,
   resave: true,
-  cookie: {
-    maxAge: 24 * 60 * 60 * 1000,
-  },
+  store: new MongoStore({
+    host: 'zion',
+    port: 32768,
+    url: 'mongodb://zion:32768/loopback',
+    datanase: 'loopback',
+    user: '',
+    password: '',
+    ttl: (1 * 60 * 60),
+    stringify: false
+  }).on('create', (sessionId) => {
+    console.log('Session created');
+  })
 }));
+
+// Validate session information
+app.use((req, res, next) => {
+
+  // Validate ip address
+  if (_.isUndefined(req.session.ip)) {
+    req.session.ip = req.ip;
+  }
+
+  if (!req.session.views) {
+    req.session.views = {}
+  }
+
+  // get the url pathname
+  var pathname = parseurl(req).pathname;
+
+  // count the views
+  req.session.views[pathname] = (req.session.views[pathname] || 0) + 1;
+
+  next();
+});
 
 app.use(myLogger({}));
 
